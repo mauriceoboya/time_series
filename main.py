@@ -10,8 +10,8 @@ START="2015-01-01"
 TODAY=date.today().strftime("%Y-%m-%d")
 
 
-st.title("Stock Prediction app")
-stocks=("AAPL","GOOG","MSFT","GME")
+st.title("Stock Prediction")
+stocks=("MANU","Nasdaq","MSFT","GME")
 selected_stocks=st.selectbox("Select dataset for prediction",stocks)
 n_years=st.slider("Years of prediction",1,4)
 period=n_years*365
@@ -39,3 +39,24 @@ def  plot_raw_data():
 
 plot_raw_data()
 
+##forecasting
+
+df_train=data[['Date','Close']]
+df_train=df_train.rename(columns={"Date":"ds","Close":"y"})
+m=Prophet()
+m.fit(df_train)
+future=m.make_future_dataframe(periods=period)
+forecast=m.predict(future)
+
+
+st.subheader("Forecast Data")
+st.write(forecast.tail())
+
+
+st.write('Forecasted stocks')
+fig1=plot_plotly(m,forecast)
+st.plotly_chart(fig1)
+
+st.write('Forecasted components')
+fig2=m.plot_components(forecast)
+st.write(fig2)
