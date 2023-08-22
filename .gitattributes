@@ -1,0 +1,1 @@
+lib/python3.11/site-packages/pyarrow/libarrow.so.1200 filter=lfs diff=lfs merge=lfs -text
