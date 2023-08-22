@@ -1,12 +1,11 @@
 pip==23.2.1
 matplotlib==3.5.3
-numpy==1.25.2
-pandas==2.0.3
-Pillow==9.5.0
-plotly==5.16.1
-prophet==1.1.4
-seaborn==0.12.2
-stack-data==0.6.2
+numpy==1.21.6
+pandas
+Pillow
+plotly
+prophet
+seaborn
 streamlit==1.25.0
 yfinance==0.2.28
 
