@@ -1,6 +1,3 @@
-import os
-os.chdir("/home/fibonacci/projects/time_series/")
-
 import pandas as pd
 import statsmodels
 import streamlit as st
