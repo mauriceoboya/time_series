@@ -8,4 +8,5 @@ prophet
 seaborn
 streamlit
 yfinance
+statsmodel
 

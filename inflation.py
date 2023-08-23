@@ -1,4 +1,8 @@
+import os
+os.chdir("/home/fibonacci/projects/time_series/")
+
 import pandas as pd
+import statsmodels
 import streamlit as st
 import yfinance as yt
 from prophet import Prophet
@@ -6,9 +10,12 @@ from prophet.plot import plot_plotly
 from plotly import graph_objects  as go
 from datetime import date
 from datetime import datetime
-from time_series.statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import adfuller
 
-st.write('Kenya Inflation Rate Prediction')
+
+
+
+st.title('Kenya Inflation Rate Prediction')
 n_years=st.slider("Years of prediction",1,4)
 period=n_years*365
 
@@ -39,9 +46,7 @@ def load_data(nrows):
         month = month_mapping[month_name]
         datetime_obj = date(int(year), month, 1)
         datetime_objects.append(datetime_obj) 
-    dataset['year'] = datetime_objects  
-    dataset.index = dataset['year']
-    del dataset['year']
+    dataset['year'] = datetime_objects 
     return dataset
 
 
@@ -49,27 +54,42 @@ load_state_data=st.write('Loading.....')
 dataset=load_data(50)
 st.write(dataset)
 
-st.write(dataset.columns)
+
 
 def  plot_raw_data():
     fig=go.Figure()
-    fig.add_trace(go.Scatter(x=['year'],y=dataset['Annual Average Inflation'],name='Annual Inflation'))
-    fig.add_trace(go.Scatter(x=['year'],y=dataset['12-Month Inflation'],name='Monthly Inflation'))
+    fig.add_trace(go.Scatter(x=dataset.index,y=dataset['Annual Average Inflation'],name='Annual Inflation'))
+    fig.add_trace(go.Scatter(x=dataset.index,y=dataset['12-Month Inflation'],name='Monthly Inflation'))
     fig.layout.update(title_text='Inflation Rates',xaxis_rangeslider_visible=True)
     st.plotly_chart(fig)
 
 plot_raw_data()
 
-
-adft = adfuller(dataset,autolag="AIC")
-output_df = pd.DataFrame({"Values":[adft[0],adft[1],adft[2],adft[3], adft[4]['1%'], adft[4]['5%'], adft[4]['10%']]  , "Metric":["Test Statistics","p-value","No. of lags used","Number of observations used", 
-                                                        "critical value (1%)", "critical value (5%)", "critical value (10%)"]})
-st.write(output_df)
+dataset=dataset.drop(columns=['12-Month Inflation'],axis=1)
+dataset.set_index('year', inplace=True)
+dataset['Date'] = dataset.index
 
 
-df_train=dataset[["year",'Annual Average Inflation']]
-df_train=df_train.rename(columns={"year":"ds","Annual Average Inflation":"y"})
+#adft = adfuller(dataset,autolag="AIC")
+#output_df = pd.DataFrame({"Values":[adft[0],adft[1],adft[2],adft[3], adft[4]['1%'], adft[4]['5%'], adft[4]['10%']]  , "Metric":["Test Statistics","p-value","No. of lags used","Number of observations used", 
+ #                                                       "critical value (1%)", #"critical value (5%)", "critical value (10%)"]})
+#st.write(output_df)
+
+
+df_train=dataset[["Date",'Annual Average Inflation']]
+df_train=df_train.rename(columns={"Date":"ds","Annual Average Inflation":"y"})
 m=Prophet()
 m.fit(df_train)
 future=m.make_future_dataframe(periods=period)
 forecast=m.predict(future)
+
+st.subheader("Forecast Inflation data")
+st.write(forecast.tail())
+
+st.subheader('Forecasted Inflation')
+fig1=plot_plotly(m,forecast)
+st.plotly_chart(fig1)
+
+st.write('Forecasted components')
+fig2=m.plot_components(forecast)
+st.write(fig2)
