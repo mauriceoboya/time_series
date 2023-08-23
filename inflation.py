@@ -6,7 +6,7 @@ from prophet.plot import plot_plotly
 from plotly import graph_objects  as go
 from datetime import date
 from datetime import datetime
-
+from time_series.statsmodels.tsa.stattools import adfuller
 
 st.write('Kenya Inflation Rate Prediction')
 n_years=st.slider("Years of prediction",1,4)
@@ -59,6 +59,12 @@ def  plot_raw_data():
     st.plotly_chart(fig)
 
 plot_raw_data()
+
+
+adft = adfuller(dataset,autolag="AIC")
+output_df = pd.DataFrame({"Values":[adft[0],adft[1],adft[2],adft[3], adft[4]['1%'], adft[4]['5%'], adft[4]['10%']]  , "Metric":["Test Statistics","p-value","No. of lags used","Number of observations used", 
+                                                        "critical value (1%)", "critical value (5%)", "critical value (10%)"]})
+st.write(output_df)
 
 
 df_train=dataset[["year",'Annual Average Inflation']]
